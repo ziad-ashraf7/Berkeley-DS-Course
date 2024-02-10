@@ -2,6 +2,7 @@ package game2048;
 
 import java.util.Formatter;
 import java.util.Observable;
+import java.util.Stack;
 
 
 /** The state of a game of 2048.
@@ -12,6 +13,7 @@ public class Model extends Observable {
     private Board board;
     /** Current score. */
     private int score;
+
     /** Maximum score so far.  Updated when game ends. */
     private int maxScore;
     /** True iff game is ended. */
@@ -94,6 +96,9 @@ public class Model extends Observable {
         setChanged();
     }
 
+
+
+
     /** Tilt the board toward SIDE. Return true iff this changes the board.
      *
      * 1. If two Tile objects are adjacent in the direction of motion and have
@@ -106,20 +111,56 @@ public class Model extends Observable {
      *    value, then the leading two tiles in the direction of motion merge,
      *    and the trailing tile does not.
      * */
+
     public boolean tilt(Side side) {
         boolean changed;
+        board.setViewingPerspective(side);
+
+
         changed = false;
+
+        for (int col = 0; col < 4; col++) {
+            int empty = 3;
+            for (int row = 2; row >= 0; row--) {
+                Tile t =board.tile(col , row);
+                if(t!=null){
+                    if(board.tile(col , empty)==null){
+                        board.move(col , empty, t);
+                        changed=true;
+                    }
+                    else if(board.tile(col , empty).value() == board.tile(col , row).value()){
+                        score=score+board.tile(col ,empty ).value()*2;
+                        board.move(col , empty, t);
+                        changed=true;
+                        empty--;
+                    }
+                    else{
+                        board.move(col , --empty, t);
+                        changed=true;
+                    }
+                }
+
+            }
+        }
+        board.setViewingPerspective(side.NORTH);
+
+
+
 
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
-
         checkGameOver();
         if (changed) {
             setChanged();
         }
+
         return changed;
+
     }
+
+
+
 
     /** Checks if the game is over and sets the gameOver variable
      *  appropriately.
@@ -137,6 +178,13 @@ public class Model extends Observable {
      *  Empty spaces are stored as null.
      * */
     public static boolean emptySpaceExists(Board b) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                if(b.tile(i,j)==null)
+                    return true;
+            }
+        }
+
         // TODO: Fill in this function.
         return false;
     }
@@ -147,10 +195,36 @@ public class Model extends Observable {
      * given a Tile object t, we get its value with t.value().
      */
     public static boolean maxTileExists(Board b) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                if(b.tile(i,j)==null || b.tile(i,j).value()!=MAX_PIECE) continue;
+                else return true;
+            }
+        }
         // TODO: Fill in this function.
         return false;
     }
 
+    private static boolean twoAdjeTiles(Board b){
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                if(j+1 != 4){
+                    if(b.tile(i,j).value()==b.tile(i,j+1).value())return true;
+                }
+                if(j-1 != -1){
+                    if(b.tile(i,j).value()==b.tile(i,j-1).value())return true;
+                }
+                if(i+1 != 4){
+                    if(b.tile(i,j).value()==b.tile(i+1,j).value())return true;
+                }
+                if(i-1 != -1){
+                    if(b.tile(i,j).value()==b.tile(i-1,j).value())return true;
+                }
+
+            }
+        }
+        return false;
+    }
     /**
      * Returns true if there are any valid moves on the board.
      * There are two ways that there can be valid moves:
@@ -158,6 +232,8 @@ public class Model extends Observable {
      * 2. There are two adjacent tiles with the same value.
      */
     public static boolean atLeastOneMoveExists(Board b) {
+        if(emptySpaceExists(b) || twoAdjeTiles(b)) return true;
+
         // TODO: Fill in this function.
         return false;
     }

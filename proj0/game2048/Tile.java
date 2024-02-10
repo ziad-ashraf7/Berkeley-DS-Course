@@ -8,7 +8,7 @@ public class Tile {
     /** A new tile with VALUE as its value at (ROW, COL).  This
      *  constructor is private, so all tiles are created by the
      *  factory methods create, move, and merge. */
-    private Tile(int value, int col, int row) {
+    public Tile(int value, int col, int row) {
         this.value = value;
         this.row = row;
         this.col = col;
