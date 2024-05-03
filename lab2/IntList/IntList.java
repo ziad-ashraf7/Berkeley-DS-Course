@@ -1,6 +1,31 @@
 package IntList;
 
+import java.util.ArrayList;
+
 public class IntList {
+    ArrayList<Integer> freq = new ArrayList<>();
+    private long fib(int n){
+        if(n==1) {
+            freq.in=0;
+            return 0;
+        }
+        else if(n==2) {
+            freq[2] = 1;
+            return 1;
+        }
+        else{
+            if(freq[n] == -1 ){
+                freq[n] = fib(n-1) + fib(n-2);
+                return freq[n];
+            }
+            else {
+                return freq[n];
+            }
+        }
+    }
+    public static void main(String[] args) {
+        System.out.println("hello");
+    }
     public int first;
     public IntList rest;
 
